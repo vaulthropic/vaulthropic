@@ -1,53 +1,45 @@
 name: Feature request
-description: Propose a change to a protocol adapter, the TypeScript SDK, or a spending guardrail.
+description: Propose a change to contracts, the TypeScript SDK, the console, or a protocol adapter.
 title: "[Feature]: "
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form for a protocol, SDK, or guardrail proposal.
+        Never paste secrets, private keys, seed phrases, or `.env` values.
 
         Vaulthropic stays non-custodial. A proposal must not ask the repository to hold user keys, pool funds, or sign without the owner.
 
-        Do not include private keys, seed phrases, `.env` values, or an unreleased fee schedule. Report a suspected vulnerability through a [security advisory](https://github.com/vaulthropic/vaulthropic/security/advisories/new).
+        For a suspected vulnerability, open a security advisory instead of this form: https://github.com/vaulthropic/vaulthropic/security/advisories/new
   - type: dropdown
     id: area
     attributes:
-      label: Area
-      description: What the proposal would change.
+      label: Package / area
+      description: Which part of the repository would change?
       options:
-        - Protocol (MCP / x402 / USDC)
-        - TypeScript SDK
-        - Spending guardrail
-        - Smart Contracts / Foundry
-        - Console / UI
+        - contracts
+        - sdk
+        - console
+        - adapters
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: Who is blocked, and what they cannot do with the current contracts, SDK, or policy.
+      label: Problem / use case
+      description: Who is blocked, and what they need from the current contracts, SDK, console, or adapter.
     validations:
       required: true
   - type: textarea
-    id: proposal
+    id: out-of-scope
     attributes:
-      label: Proposed change
+      label: Out-of-scope notes
+      description: What this proposal is not asking to change. Call out custody, pooled funds, commercial pricing, or operator tooling when those are nearby. Write "None" when nothing is excluded.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
       description: What should change, and which contract, package, or console surface should own it.
     validations:
       required: true
-  - type: textarea
-    id: policy
-    attributes:
-      label: Policy and security impact
-      description: Say whether this changes allowlists, spend ceilings, signing, settlement, or the non-custodial boundary. Write "None" when it does not.
-    validations:
-      required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives considered
-      description: Other approaches you considered, and why you are not proposing them.
-    validations:
-      required: false
