@@ -1,59 +1,50 @@
 name: Bug report
-description: Report a defect in the smart contracts, TypeScript SDK, console, or MCP, x402, and USDC adapters.
+description: Report a defect in contracts, the TypeScript SDK, the console, or a protocol adapter.
 title: "[Bug]: "
 body:
   - type: markdown
     attributes:
       value: |
-        Describe a defect you can reproduce.
+        Never paste secrets, private keys, seed phrases, or `.env` values.
 
-        Do not include private keys, seed phrases, `.env` values, tokenized RPC URLs, or customer data.
-
-        For a suspected vulnerability, open a [security advisory](https://github.com/vaulthropic/vaulthropic/security/advisories/new) instead of this form. The private report path is also described in `docs/SECURITY.md`.
+        For a suspected vulnerability, open a security advisory instead of this form: https://github.com/vaulthropic/vaulthropic/security/advisories/new
   - type: dropdown
-    id: component
+    id: area
     attributes:
-      label: Component
+      label: Package / area
       description: Which part of the repository is affected?
       options:
-        - Smart Contracts / Foundry
-        - TypeScript SDK
-        - Console / UI
-        - MCP / x402 / USDC
-    validations:
-      required: true
-  - type: textarea
-    id: what-happened
-    attributes:
-      label: What happened
-      description: What failed, including the error text or the wrong decision, amount, or screen.
+        - contracts
+        - sdk
+        - console
+        - adapters
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Expected behavior
-      description: What you expected the contract, package, or console to do.
+      description: What the contract, SDK, console, or adapter should have done.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead, including the error text or the wrong decision, amount, or screen.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
-      description: Include the command or the console path. Contract reports can cite `forge test`. SDK and console reports can cite `pnpm test`, `pnpm lint`, or the page you opened.
-    validations:
-      required: true
-  - type: input
-    id: version
-    attributes:
-      label: Commit or version
-      description: A commit SHA, a release tag, or main.
+      label: Reproduction steps
+      description: Commands or the console path. Contract reports can cite `forge test`. SDK and console reports can cite `pnpm test` or `pnpm lint`.
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: out-of-scope
     attributes:
-      label: Logs
-      description: Paste redacted command output or a short trace. Leave this empty when you have none.
+      label: Out-of-scope notes
+      description: What this report is not asking to change. Include commercial pricing, custody, or operator tooling when those are nearby but not part of the defect. Write "None" when nothing is excluded.
     validations:
-      required: false
+      required: true
