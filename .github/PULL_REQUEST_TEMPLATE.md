@@ -8,7 +8,7 @@ The required status check is `Vaulthropic CLA`. After you open this pull request
 
 `I have read and agree to the terms of CLA.md`
 
-The recommended comment has no trailing period. One trailing period is also accepted. Letter case and extra spaces do not matter. Any other text in that comment does not count. Posting the comment re-runs `.github/workflows/cla.yml` and updates the `Vaulthropic CLA` status. `dependabot[bot]` is allowlisted and does not comment. The agreement is https://github.com/vaulthropic/vaulthropic/blob/main/CLA.md.
+No trailing period is required. One trailing period is also accepted. Letter case and extra spaces do not matter. Any other text in that comment does not count. Posting the comment re-runs `.github/workflows/cla.yml` and updates the `Vaulthropic CLA` status. `dependabot[bot]` is allowlisted and does not comment. The agreement is https://github.com/vaulthropic/vaulthropic/blob/main/CLA.md.
 
 The workflow stays skipped until the repository variable `CLA_GATE_ENABLED` is `true`.
 
