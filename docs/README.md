@@ -40,6 +40,7 @@ The name, logo, and brand identity are reserved in [TRADEMARKS.md](../TRADEMARKS
 | [TRADEMARKS.md](../TRADEMARKS.md) | No right to the Vaulthropic name, logo, or brand |
 | [CLA.md](../CLA.md) | Contributor license agreement |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Local setup, checks, secrets, and CLA acceptance |
+| [ISSUE_TEMPLATE](../.github/ISSUE_TEMPLATE/config.yml) | Bug and feature forms. Blank issues stay closed. Security reports go to a GitHub Security Advisory |
 | [PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | Pull request checklist |
 | [cla.yml](../.github/workflows/cla.yml) | CLA gate, skipped until `CLA_GATE_ENABLED` is `true` |
 

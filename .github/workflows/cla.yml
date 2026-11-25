@@ -7,6 +7,20 @@
 # is used so the base repository's workflow and script run, and the checkout ref
 # is the default branch. Do not change the checkout to the pull request head.
 #
+# issue_comment runs this same file from the default branch when someone comments
+# on a pull request, including the CLA acceptance comment. Comments on ordinary
+# issues do not start the job.
+#
+# scripts/cla-gate.mjs accepts the recommended comment, which has no trailing
+# period: I have read and agree to the terms of CLA.md
+# CLA_ACCEPTANCE_PATTERN is ^I have read and agree to the terms of CLA\.md\.?$
+# so one trailing period also matches. Whitespace is collapsed and letter case
+# is ignored. The comment must otherwise be only that sentence.
+#
+# The script posts the commit status context "Vaulthropic CLA". Branch protection
+# should require that context. The Actions job name stays "CLA acceptance", so
+# the workflow run is "CLA / CLA acceptance".
+#
 # Enabling also needs branch protection that lets GitHub Actions update
 # signatures/cla.json, or the acceptance comment remains the record when the
 # commit is rejected. Mark "Vaulthropic CLA" as a required check only after a
@@ -26,10 +40,20 @@ permissions:
   pull-requests: write
   statuses: write
 
+concurrency:
+  group: cla-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   cla:
     name: CLA acceptance
-    if: vars.CLA_GATE_ENABLED == 'true'
+    if: >-
+      vars.CLA_GATE_ENABLED == 'true' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'pull_request_target' ||
+        (github.event_name == 'issue_comment' && github.event.issue.pull_request)
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Check out the default branch
@@ -42,7 +66,9 @@ jobs:
         with:
           node-version: 22
 
-      - name: Require the exact CLA comment
+      - name: Require the CLA acceptance comment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLA_STATUS_CONTEXT: Vaulthropic CLA
+          CLA_ACCEPTANCE_PATTERN: '^I have read and agree to the terms of CLA\.md\.?$'
         run: node scripts/cla-gate.mjs

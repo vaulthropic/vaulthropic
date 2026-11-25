@@ -5,6 +5,7 @@ This file records public, user-visible changes. Security-sensitive details shoul
 ## Unreleased
 
 - The public license is the MIT license in `LICENSE`. Contributor terms are in `CONTRIBUTING.md` and `CLA.md`. The name and brand are reserved in `TRADEMARKS.md`. The CLA workflow stays skipped until `CLA_GATE_ENABLED` is set.
+- Issue forms, the pull request template, and the CLA gate tell contributors how to pass `Vaulthropic CLA`. The recommended comment has no trailing period, and one trailing period also passes. A pull request comment runs the check again.
 - The landing page fits one viewport, with an edge-to-edge header shared by the guide. Sign-in is one card: Wallet Signature, and Passkey (Optional) only when the browser reports a platform authenticator. The Decision Lab is its own screen, with a Testnet rehearsal and a Mainnet tab that does not store credentials or settle while deployment addresses are null.
 - The `/docs` reading surface renders from MDX. `/docs/usdc-apis` explains the 402 retry, endpoint prefixes, `payTo` allowlisting, and provider setup. Existing `/docs#...` section links stay on the guide.
 - Product and engineering documentation lives in `docs/`. See `docs/REPOSITORY.md`.

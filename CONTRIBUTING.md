@@ -64,11 +64,13 @@ forge fmt --check
 
 By submitting a contribution, you agree to license your changes under the repository [LICENSE](LICENSE) and [CLA.md](CLA.md) unless you state otherwise. You confirm that you have the right to submit the code under those terms. Contributions are voluntary and are made without expectation of compensation.
 
-Comment this exact sentence on the pull request, with no other text:
+Comment this sentence on the pull request, with no other text:
 
-`I have read and agree to the terms of CLA.md.`
+`I have read and agree to the terms of CLA.md`
 
-`.github/workflows/cla.yml` stays skipped until the repository variable `CLA_GATE_ENABLED` is `true`. When that gate is enabled, it checks out the default branch, reads pull-request comments, and accepts that sentence from the pull request author. A match is recorded in `signatures/cla.json`. `dependabot[bot]` is allowlisted and does not comment. The workflow does not run code from the pull request.
+The recommended comment has no trailing period. One trailing period is also accepted. Letter case and extra spaces do not matter. Any other text in the comment does not count.
+
+`.github/workflows/cla.yml` stays skipped until the repository variable `CLA_GATE_ENABLED` is `true`. When that gate is enabled, it checks out the default branch, reads pull-request comments, and accepts that sentence from the pull request author. A new comment on the pull request runs the check again. The commit status context is `Vaulthropic CLA`. A match is recorded in `signatures/cla.json`. `dependabot[bot]` is allowlisted and does not comment. The workflow does not run code from the pull request.
 
 ## Secrets, payTo, and contract addresses
 

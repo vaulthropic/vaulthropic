@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose a change to a protocol adapter, the TypeScript SDK, or a spending guardrail.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a protocol, SDK, or guardrail proposal.
+
+        Vaulthropic stays non-custodial. A proposal must not ask the repository to hold user keys, pool funds, or sign without the owner.
+
+        Do not include private keys, seed phrases, `.env` values, or an unreleased fee schedule. Report a suspected vulnerability through a [security advisory](https://github.com/vaulthropic/vaulthropic/security/advisories/new).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: What the proposal would change.
+      options:
+        - Protocol (MCP / x402 / USDC)
+        - TypeScript SDK
+        - Spending guardrail
+        - Smart Contracts / Foundry
+        - Console / UI
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who is blocked, and what they cannot do with the current contracts, SDK, or policy.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should change, and which contract, package, or console surface should own it.
+    validations:
+      required: true
+  - type: textarea
+    id: policy
+    attributes:
+      label: Policy and security impact
+      description: Say whether this changes allowlists, spend ceilings, signing, settlement, or the non-custodial boundary. Write "None" when it does not.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you considered, and why you are not proposing them.
+    validations:
+      required: false
