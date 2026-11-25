@@ -24,6 +24,7 @@ docs/               Product, API, security, and assurance documents
 .githooks/          Commit and push checks
 .github/workflows/  CI for lint, tests, secret scan, and forge
 .github/workflows/cla.yml  CLA comment gate, skipped until CLA_GATE_ENABLED=true
+.github/ISSUE_TEMPLATE/  Bug report, feature request, and the security advisory contact
 .github/PULL_REQUEST_TEMPLATE.md  Checklist for secrets, checks, and CLA.md
 ```
 
@@ -44,6 +45,7 @@ That sets `core.hooksPath` to `.githooks`.
 | `git commit` | The checks in `.githooks/pre-commit` |
 | `git push` | The checks in `.githooks/pre-push` |
 | Pull request and push CI | The jobs in `.github/workflows/ci.yml`: secret scan, ESLint, `tsc`, Vitest, the console build, `forge fmt --check`, and `forge test` |
+| Pull request, when `CLA_GATE_ENABLED` is `true` | `.github/workflows/cla.yml` posts the `Vaulthropic CLA` status. A pull request comment runs it again. The recommended comment has no trailing period. One trailing period also passes. |
 
 `.pre-commit-config.yaml` exposes the same Node checks for people who use the pre-commit framework.
 

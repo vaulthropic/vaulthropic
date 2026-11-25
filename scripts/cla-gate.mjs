@@ -7,17 +7,41 @@ import { Buffer } from "node:buffer";
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-export const CLA_ACCEPTANCE_COMMENT = "I have read and agree to the terms of CLA.md.";
+export const CLA_ACCEPTANCE_COMMENT = "I have read and agree to the terms of CLA.md";
+// The dot in CLA.md is literal. \.? is the optional trailing period.
+export const CLA_ACCEPTANCE_PATTERN = "^I have read and agree to the terms of CLA\\.md\\.?$";
+export const CLA_STATUS_CONTEXT = "Vaulthropic CLA";
 export const CLA_VERSION = "1";
 export const DEFAULT_BOT_ALLOWLIST = ["dependabot[bot]"];
 export const REMINDER_MARKER = "<!-- vaulthropic-cla -->";
 
-export function normalizeComment(body) {
-  return String(body ?? "").replaceAll("\r\n", "\n").trim();
+export function collapseWhitespace(body) {
+  return String(body ?? "")
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .trim()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function acceptanceRegExp() {
+  const requested = process.env.CLA_ACCEPTANCE_PATTERN;
+  if (requested !== undefined && requested !== CLA_ACCEPTANCE_PATTERN) {
+    throw new Error(`CLA_ACCEPTANCE_PATTERN must be ${CLA_ACCEPTANCE_PATTERN}.`);
+  }
+  return new RegExp(CLA_ACCEPTANCE_PATTERN, "i");
 }
 
 export function isExactAcceptance(body) {
-  return normalizeComment(body) === CLA_ACCEPTANCE_COMMENT;
+  return acceptanceRegExp().test(collapseWhitespace(body));
+}
+
+export function statusContext() {
+  const requested = process.env.CLA_STATUS_CONTEXT;
+  if (requested !== undefined && requested !== CLA_STATUS_CONTEXT) {
+    throw new Error(`CLA_STATUS_CONTEXT must be ${CLA_STATUS_CONTEXT}.`);
+  }
+  return CLA_STATUS_CONTEXT;
 }
 
 export function allowlistFor(doc) {
@@ -60,9 +84,13 @@ export function reminderBody() {
     "",
     "This pull request is missing the acceptance of CLA.md.",
     "",
-    "Comment this exact sentence, with no other text:",
+    "Comment this sentence, with no other text:",
     "",
     `\`${CLA_ACCEPTANCE_COMMENT}\``,
+    "",
+    "The recommended comment has no trailing period. One trailing period is also accepted. Letter case and extra spaces do not matter. Any other text in the comment does not count.",
+    "",
+    "Posting the comment on this pull request runs the check again. The status context is `Vaulthropic CLA`.",
     "",
     "A recorded acceptance grants no compensation. dependabot[bot] is allowlisted.",
   ].join("\n");
@@ -73,7 +101,7 @@ export function statusDescription(result) {
     "allowlisted-bot": "Allowlisted bot. No CLA comment required.",
     signed: "CLA acceptance is on file for this version.",
     "comment-accepted": "CLA acceptance comment recorded.",
-    "missing-acceptance": "Comment the exact CLA acceptance sentence.",
+    "missing-acceptance": "Comment the CLA sentence. A trailing period is also accepted.",
     "missing-author": "Pull request author is missing.",
   };
   return descriptions[result.reason] ?? "CLA check failed.";
@@ -219,7 +247,7 @@ export async function runClaGate({ token, repository, eventName, event, branch, 
     method: "POST",
     body: {
       state: result.state === "success" ? "success" : "failure",
-      context: "Vaulthropic CLA",
+      context: statusContext(),
       description: statusDescription(result).slice(0, 140),
       target_url: `${serverUrl}/${repository}/blob/${branch}/CLA.md`,
     },
