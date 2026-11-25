@@ -1,0 +1,14 @@
+{
+  "name": "@vaulthropic/core",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic spending policy, reason codes, and non-custodial sign-in primitives.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "viem": "^2.23.2"
+  }
+}

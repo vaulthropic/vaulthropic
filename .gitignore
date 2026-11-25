@@ -1,0 +1,77 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+.vercel/
+coverage/
+.vitest/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Foundry. forge-std is installed locally and in CI; it is not part of the public source.
+lib/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# Secrets, keys, and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+keystore*
+*.jks
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+
+# Local files and directories
+/AGENTS.md
+/img-board/
+/docs/ACCESS-AND-SECRETS.md
+/docs/COMMERCIAL-GOVERNANCE.md
+/docs/COMPLIANCE-GOVERNANCE.md
+/docs/OPERATIONS-RUNBOOK.md
+/docs/PRODUCT-BLUEPRINT.md
+/docs/RISK-REGISTER.md
+/docs/ROADMAP.md
+/docs/VENDOR-MANAGEMENT.md
+/docs/AUDIT-ASSURANCE.md
+/docs/COMPLIANCE.md
+/docs/DATA-PROTECTION.md
+/docs/INCIDENT-RESPONSE.md
+/docs/RISK-CONTROLS.md
+/docs/RELEASES.md
+/scripts/init-private-workspace.sh
+private/
+business/
+pricing/
+internal/
+secrets/
+ops/
+general/
+
+# Local data and logs
+*.sqlite
+*.sqlite3
+*.db
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*~

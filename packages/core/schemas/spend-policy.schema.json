@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vaulthropic.com/schemas/spend-policy-1.json",
+  "title": "Vaulthropic spend policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "policyId", "account", "environment", "chains", "assets", "limits", "allowlists", "mandates", "session"],
+  "properties": {
+    "version": { "const": "1" },
+    "policyId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "account": { "type": "string" },
+    "environment": { "enum": ["sandbox", "mainnet"] },
+    "chains": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["chain", "asset", "symbol", "decimals"],
+        "properties": {
+          "chain": { "type": "string" },
+          "asset": { "type": "string" },
+          "symbol": { "type": "string" },
+          "decimals": { "type": "integer", "minimum": 0, "maximum": 36 }
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["perTransaction", "perEpoch", "epochSeconds", "stepUpAbove"],
+      "properties": {
+        "perTransaction": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "perEpoch": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "epochSeconds": { "type": "integer", "minimum": 60 },
+        "stepUpAbove": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "maxFeeAmount": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+        "maxFeeBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "maxGasAmount": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+        "maxCombinedAmount": { "type": "string", "pattern": "^[1-9][0-9]*$" }
+      }
+    },
+    "allowlists": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipients", "endpoints", "mcp"],
+      "properties": {
+        "recipients": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "type": "string" } },
+        "endpoints": { "type": "array", "items": { "type": "string" } },
+        "mcp": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["server", "tools"],
+            "properties": {
+              "server": { "type": "string" },
+              "tools": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "mandates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requireIntentForAutonomous", "maxMandateTtlSeconds"],
+      "properties": {
+        "requireIntentForAutonomous": { "type": "boolean" },
+        "maxMandateTtlSeconds": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signer", "validUntil", "paused"],
+      "properties": {
+        "signer": { "type": "string" },
+        "validUntil": { "type": "integer", "minimum": 1 },
+        "paused": { "type": "boolean" }
+      }
+    }
+  }
+}

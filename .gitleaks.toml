@@ -1,0 +1,15 @@
+title = "Vaulthropic public repository"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Build output and third-party library checkouts are not source"
+paths = [
+  '''(?:^|/)node_modules(?:/|$)''',
+  '''(?:^|/)contracts/lib(?:/|$)''',
+  '''(?:^|/)contracts/out(?:/|$)''',
+  '''(?:^|/)contracts/cache(?:/|$)''',
+  '''(?:^|/)dist(?:/|$)''',
+  '''(?:^|/)\.env\.example$''',
+]

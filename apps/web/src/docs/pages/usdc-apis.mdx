@@ -1,0 +1,236 @@
+<section className="docs-section" id="names">
+  <h2>What these services are called</h2>
+  <p>A service that sells one HTTP call for a stablecoin payment shows up under three names that mean the same shape of API:</p>
+  <ul>
+    <li><strong>x402 pay-per-call APIs.</strong> The client calls a URL, reads an HTTP 402 challenge, and retries the same request with a signed payment.</li>
+    <li><strong>HTTP 402 metered endpoints.</strong> The price is on that challenge, in integer minor units, for that request. There is no monthly plan inside the challenge.</li>
+    <li><strong>Agentic USDC payment endpoints.</strong> The usual asset is USDC. The receiving account is the challenge field <code>payTo</code>.</li>
+  </ul>
+  <p>Those names are not three products. They are three labels for one exchange: an unpaid call, a 402, then a paid retry. An API key and a subscription are different exchanges.</p>
+  <div className="docs-table-wrap">
+  <table className="docs-table">
+    <caption>How a paid HTTP call is authorized</caption>
+    <thead>
+      <tr>
+        <th scope="col">Model</th>
+        <th scope="col">What the client sends</th>
+        <th scope="col">What limits the spend</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">API key</th>
+        <td>A secret the host stores and attaches to the call. The vendor recognizes an account.</td>
+        <td>The vendor’s own meter, prepaid balance, or dashboard cap. The key is not a Vaulthropic policy, and it is not a spending signature.</td>
+      </tr>
+      <tr>
+        <th scope="row">Subscription</th>
+        <td>Account credentials for a period plan. Calls inside the plan are not priced one by one on a 402.</td>
+        <td>The plan the vendor sold. That plan is not <code>limits.perTransaction</code> and it does not allowlist a <code>payTo</code>.</td>
+      </tr>
+      <tr>
+        <th scope="row">x402 pay-per-call</th>
+        <td>No vendor secret on the paid call. The first response is 402. The retry carries a signed payment for that request.</td>
+        <td>The challenge amount, asset, chain, and <code>payTo</code>, checked against your ceilings and allowlists before anyone signs.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <Callout tone="warning" title="This repository is not a live settlement deployment">
+    <p><code>contracts/deployments/base.json</code> and <code>contracts/deployments/base-sepolia.json</code> stay <code>not-deployed</code>. <code>policyAnchor</code> and <code>guardAccountFactory</code> are null. An x402 USDC payment is an EIP-3009 signature from the user’s wallet. USDC does not call <code>PolicyAnchor</code> for that signature. Vaulthropic prepares the unsigned payload only after allow, and only after the same in-memory ledger reserves the attempt.</p>
+  </Callout>
+  <p>Vaulthropic is not affiliated with Brave, TwitterAPI.io, CoinGecko, Massive, RunAPI, PayAPI Market, Circle, Base, or the authors of x402.</p>
+</section>
+
+<section className="docs-section" id="flow">
+  <h2>From the 402 challenge to the paid retry</h2>
+  <p><code>evaluateX402</code> accepts an x402 version 2 <code>exact</code> requirement. Allow, block, and step-up all omit the unsigned authorization. <code>releaseX402Authorization</code> returns it only when that same <code>AttemptLedger</code> holds the matching <code>CREATED</code> reservation. The user’s wallet signs. This package does not broadcast the payment.</p>
+  <ol>
+    <li>The agent calls the resource URL with no payment header.</li>
+    <li>The server answers <strong>402</strong> with <code>PAYMENT-REQUIRED</code>. The body is base64 JSON or raw JSON. It names the scheme, the network, the asset, the amount in minor units, <code>payTo</code>, the resource URL, and a timeout.</li>
+    <li>The host passes that requirement to <code>evaluateX402</code>, plus <code>quotedFeeAmount</code> and <code>maxGasFee</code> when the quote includes them. The endpoint checked is <code>resource.url</code> on the challenge. The recipient checked is <code>payTo</code>.</li>
+    <li>A block or a step-up stops here. No payload is released and nothing is signed.</li>
+    <li>An allow is not yet a signature. <code>AttemptLedger.begin</code> reserves principal plus quoted fee plus gas for one idempotency key.</li>
+    <li><code>releaseX402Authorization</code> returns the unsigned EIP-3009 fields (<code>from</code>, <code>to</code>, <code>value</code>, <code>validAfter</code>, <code>validBefore</code>, <code>nonce</code>) only for that reservation. <code>to</code> is the challenge <code>payTo</code>. <code>from</code> is the policy account, the wallet that holds the USDC.</li>
+    <li>The user’s signer signs that payload. The host retries the <strong>same</strong> request with <code>PAYMENT-SIGNATURE</code>.</li>
+    <li>The provider’s facilitator submits the transfer. Record the receipt the provider returns. A second presentation of a settled challenge is <code>BLOCK_REPLAY</code>.</li>
+  </ol>
+  <pre className="sequence">{`Agent            Vaulthropic          AttemptLedger         Provider
+  |  GET url          |                     |                     |
+  |--------------------------------------------------------------->|
+  |  402 PAYMENT-REQUIRED (amount, asset, chain, payTo, url)      |
+  |<---------------------------------------------------------------|
+  |  evaluate         |                     |                     |
+  |------------------>| allow / step-up / block                   |
+  |                   | begin               |                     |
+  |                   |-------------------->| reserve once        |
+  |                   | release unsigned    |                     |
+  |  user signs       |                     |                     |
+  |  retry + PAYMENT-SIGNATURE                                     |
+  |--------------------------------------------------------------->|`}</pre>
+  <p>A challenge can list more than one network. The evaluator keeps the first <code>exact</code> option whose chain and asset are on the policy. If none match, the reason is <code>BLOCK_CHAIN_NOT_ALLOWLISTED</code> and there is no authorization. The v1 console selector lists Base (<code>eip155:8453</code>) and Base Sepolia (<code>eip155:84532</code>). Solana, Polygon, and any other rail in a provider’s menu stay outside that selector even when the provider offers them.</p>
+  <p>More than one host process must not release an EIP-3009 payload from a shared budget. <code>processes</code> other than 1 throws until one serializable store reserves that budget. The ledger in this build is one JavaScript realm.</p>
+</section>
+
+<section className="docs-section" id="endpoints">
+  <h2>How endpoint URLs work</h2>
+  <p>The endpoint is the resource URL on the challenge, not a URL remembered from a blog and not the Decision Lab’s placeholder. Allowlists are fail-closed. A URL that does not match is <code>BLOCK_ENDPOINT_NOT_ALLOWLISTED</code>. A provider cannot add its own URL.</p>
+  <p>Each allowlist entry is a prefix after a strict normalization:</p>
+  <ul>
+    <li>The scheme must be <code>https</code> or <code>http</code>. Use <code>https</code> for these hosts. <code>http</code> and <code>https</code> are different entries.</li>
+    <li>A username or password in the URL is rejected. A credential does not belong in the resource URL.</li>
+    <li>A fragment (<code>#...</code>) is removed. A query string is kept.</li>
+    <li>The entry matches that exact URL, a longer path under it (<code>prefix/...</code>), or any query on that exact path (<code>prefix?...</code>).</li>
+  </ul>
+  <p>The example policy prefix is <span className="mono">https://merchant.example</span>. These three URLs match it. <span className="mono">https://merchant.example.evil</span> does not, and neither does a different host.</p>
+  <ul>
+    <li><span className="mono">https://merchant.example</span></li>
+    <li><span className="mono">https://merchant.example/quote</span></li>
+    <li><span className="mono">https://merchant.example/quote?q=weather</span></li>
+  </ul>
+  <p>A narrower entry is safer. <span className="mono">https://merchant.example/search</span> matches <span className="mono">https://merchant.example/search?q=weather</span> and <span className="mono">https://merchant.example/search/page</span>. It does not match <span className="mono">https://merchant.example/searching</span>. An entry that already contains a query matches that query, not a different one. The allowlist cannot say “only the <code>q</code> parameter.” If every query on a path is acceptable, allowlist the path without a query. If only one query is acceptable, allowlist that full URL. A prefix of the bare origin allows every path and every query on that host. Prefer the path you intend to call.</p>
+  <h3>Rehearse in the Decision Lab</h3>
+  <p>The <LabLink>Decision Lab</LabLink> starts from the example policy. Evaluation does not need an account, does not call the provider, and does not sign or broadcast. Ceiling edits stay in the page. They do not change the example policy hash.</p>
+  <ol>
+    <li>Leave the endpoint under <span className="mono">https://merchant.example</span>. <strong>Use example allowlisted recipient</strong> fills <span className="mono">https://merchant.example/quote</span> and the example recipient. Vary the amount and confirm allow, step-up, and block.</li>
+    <li>Paste a live provider URL into the endpoint field while the allowlist is still the example. The decision is <code>BLOCK_ENDPOINT_NOT_ALLOWLISTED</code>. That block is the rehearsal. A lab allow on the placeholder is not permission to call the live host.</li>
+    <li>Add a live prefix only on a policy you intend to use, after the 402 for that URL shows the same host and path. Then point the agent at that policy. Do not widen <span className="mono">https://merchant.example</span> and pretend it covers the provider.</li>
+  </ol>
+</section>
+
+<section className="docs-section" id="payto">
+  <h2 id="challenge">How receiving addresses (payTo) work</h2>
+  <p><code>payTo</code> is the account that receives the USDC for that call. It is a field on the 402 challenge. It is not a Vaulthropic contract, not the example policy recipient, and not an address printed in a marketplace write-up.</p>
+  <p>Read it from one of two places:</p>
+  <ul>
+    <li>The provider’s own current documentation, when that page prints the address for the network you will use.</li>
+    <li>The <code>PAYMENT-REQUIRED</code> payload on the unpaid request you are about to pay. That payload is the one <code>evaluateX402</code> will see.</li>
+  </ul>
+  <p>If those two disagree, use the challenge on your request. A copied address goes stale when a provider rotates wallets. A directory, a blog, or a search snippet is not a source. The allowlist stores a checksummed address. The challenge <code>payTo</code> has to be that account or the reason is <code>BLOCK_RECIPIENT_NOT_ALLOWLISTED</code>. The recipient list is fail-closed and holds at most 64 addresses. A model or a merchant cannot append itself.</p>
+  <p>Check the rest of the same challenge before you add the address:</p>
+  <ul>
+    <li><strong>Network.</strong> Base is <code>eip155:8453</code>. Base Sepolia is <code>eip155:84532</code>. Another network in the same payload is not selectable in v1.</li>
+    <li><strong>Asset.</strong> Compare <code>asset</code> with the USDC address in the Networks section of the guide for the chain you selected. Do not paste a token address from a third-party post into the policy.</li>
+    <li><strong>Amount.</strong> Minor units, 6 decimals for USDC. 10000 minor units are 0.01 USDC. The amount still has to pass the caps below. An allowlisted payee can still be blocked for size.</li>
+  </ul>
+  <Callout tone="note" title="The challenge is the source of payTo">
+    <p>Provider pages move hosts and rotate receiving accounts. Read <code>payTo</code>, <code>asset</code>, <code>network</code>, and <code>amount</code> from the live 402 response for the URL you are calling. Then put that payee on the recipient allowlist and that URL on the endpoint allowlist.</p>
+  </Callout>
+</section>
+
+<section className="docs-section" id="guardrails">
+  <h2>Guardrails before anything is signed</h2>
+  <p>Ceilings are the user’s. A provider’s advertised price is a quote until the 402 states the amount. Set the caps, confirm them on the example policy in the <LabLink>Decision Lab</LabLink>, and only then release a payload for a live challenge. The example policy starts at 10 USDC step-up, 25 USDC per transaction, and 100 USDC per epoch. Those numbers are the rehearsal, not a provider’s price.</p>
+  <PolicyNote>
+    <ul>
+      <li><strong>Per-transaction cap</strong> (<code>limits.perTransaction</code>). One call above it is <code>BLOCK_PER_TX_CAP</code>. Set it at or below the largest single 402 you are willing to sign.</li>
+      <li><strong>Epoch budget</strong> (<code>limits.perEpoch</code> over <code>limits.epochSeconds</code>). Principal plus quoted fee plus gas counts toward it. Overflow is <code>BLOCK_EPOCH_CAP</code>. The example epoch is 86400 seconds.</li>
+      <li><strong>Step-up threshold</strong> (<code>limits.stepUpAbove</code>). At or above it, the outcome is <code>STEP_UP_ABOVE_THRESHOLD</code> and no payload is released. The host may retry with <code>stepUpSatisfied</code> only after the owner factor is verified. A page-local TOTP match does not set that flag and does not raise the cap.</li>
+      <li><strong>Fee ceiling</strong> (<code>maxFeeAmount</code> and <code>maxFeeBps</code>, 0 through 10000). A positive quoted fee with neither ceiling set is <code>BLOCK_FEE_CEILING</code>. Pass <code>quotedFeeAmount</code> in minor units beside the requirement.</li>
+      <li><strong>Gas ceiling</strong> (<code>maxGasAmount</code>). A positive gas quote with that ceiling omitted is <code>BLOCK_GAS_CEILING</code>. Many of these hosts say the facilitator pays gas. If the challenge still quotes a gas amount, the ceiling has to allow it. Pass that quote as <code>maxGasFee</code>.</li>
+      <li><strong>Combined ceiling</strong> (<code>maxCombinedAmount</code>). Principal plus fee plus gas above it is <code>BLOCK_COMBINED_CEILING</code>. The combined ceiling cannot exceed the epoch budget.</li>
+    </ul>
+  </PolicyNote>
+  <p>Normalization requires <code>stepUpAbove &lt;= perTransaction &lt;= perEpoch</code>. Equal caps are valid. On the example policy, rehearse these probes with the placeholder endpoint and the example recipient:</p>
+  <ul>
+    <li>1 USDC, zero fee, zero gas: <code>ALLOW_WITHIN_POLICY</code>.</li>
+    <li>10 USDC: <code>STEP_UP_ABOVE_THRESHOLD</code>. No payload.</li>
+    <li>30 USDC: <code>BLOCK_PER_TX_CAP</code>.</li>
+    <li>A positive fee with no fee ceiling: <code>BLOCK_FEE_CEILING</code>.</li>
+    <li>A positive gas quote with no gas ceiling: <code>BLOCK_GAS_CEILING</code>.</li>
+  </ul>
+  <h3>Idempotency and retries</h3>
+  <p>The idempotency key is <code>agentId</code>, <code>sessionId</code>, protocol <code>x402</code>, and <code>requestIntentId</code>. <code>AttemptLedger.begin</code> returns the existing attempt for that key and does not reserve a second time. Use one intent id for the unpaid call and for the paid retry of that same request. A later page, cursor, or new search is a new intent id. Reusing the old id returns the first attempt.</p>
+  <p>A settled challenge, payment reference, or receipt presented again is <code>BLOCK_REPLAY</code>. A second serial begin while one attempt is still open is <code>BLOCK_ATTEMPT_IN_FLIGHT</code>. Repeating <code>releaseX402Authorization</code> for the same reservation returns the same 32-byte payload nonce. A different ledger does not hold the reservation, so it returns no payload.</p>
+</section>
+
+<section className="docs-section" id="brave">
+  <h2>Brave Search</h2>
+  <EndpointSetup
+    docsHref="https://api-dashboard.search.brave.com/documentation/guides/agent-payments"
+    docsLabel="Brave agent payments guide"
+    host="https://search.agent.s.brave.app"
+  >
+    <p>Brave’s guide describes a search host that answers a call with no API key by returning 402 and a list of payment options. It points agents at <span className="mono">https://search.agent.s.brave.app/llms.txt</span> for current prices and rails, and at <span className="mono">https://search.agent.s.brave.app/openapi.json</span> for paid paths. Web, news, video, image, and place search are the paths that guide lists. Answers, autosuggest, and spellcheck are not sold on that host.</p>
+    <ol>
+      <li>Pick the path you will call from the OpenAPI document. Allowlist that path, not the whole origin, unless you intend every route on the host.</li>
+      <li>Call it once with no payment header. Read <code>payTo</code>, asset, network, and amount from that 402.</li>
+      <li>Add that payee and that URL prefix to the policy. A price note on <span className="mono">llms.txt</span> is not the cap. The challenge amount is.</li>
+    </ol>
+  </EndpointSetup>
+</section>
+
+<section className="docs-section" id="twitter">
+  <h2>TwitterAPI.io</h2>
+  <EndpointSetup
+    docsHref="https://twitterapi.io/blog/x402-twitter-api"
+    docsLabel="TwitterAPI.io x402 post"
+    host="https://api.twitterapi.io"
+  >
+    <p>The provider’s post describes read-only GET routes under <span className="mono">/x402/twitter/</span>. One documented shape is <span className="mono">https://api.twitterapi.io/x402/twitter/user/info?userName=jack</span>. A call without payment returns <code>PAYMENT-REQUIRED</code> with base64 JSON, including the amount and the address to pay. The same request is retried with <code>PAYMENT-SIGNATURE</code>. Their docs also publish <span className="mono">https://api.twitterapi.io/.well-known/x402</span>.</p>
+    <p>The post’s example amounts are 3000 minor units on most routes and 1000 minor units for a post by id, on Base or Solana, with a timeout of 300 seconds. Treat those figures as the article’s example. The header on your call is the amount, the asset, and the <code>payTo</code> to allowlist. Do not copy a shortened address out of the post. Solana is not a v1 selector row. A Base challenge uses <code>eip155:8453</code>.</p>
+    <p>Query parameters are part of the resource URL. An allowlist entry of <span className="mono">https://api.twitterapi.io/x402/twitter/user/info</span> matches any <code>userName</code> query and any child path. Allowlist a full URL including the query only when that one query is the call you want. Rehearse the block in the <LabLink>Decision Lab</LabLink> before this prefix is on a live policy. Their published example price is not your per-transaction cap.</p>
+  </EndpointSetup>
+</section>
+
+<section className="docs-section" id="coingecko">
+  <h2>CoinGecko</h2>
+  <EndpointSetup
+    docsHref="https://docs.coingecko.com/ai-integration/x402"
+    docsLabel="CoinGecko x402 guide"
+    host="https://pro-api.coingecko.com/api/v3/x402/"
+  >
+    <p>CoinGecko’s guide says to insert <code>/x402/</code> after <code>/v3/</code> on supported paths, and that the server answers 402 with payment requirements. A documented shape is a path under <span className="mono">https://pro-api.coingecko.com/api/v3/x402/</span>, including <span className="mono">/x402/simple/price</span>. The guide labels the endpoints experimental and says pricing can change. The page has described 0.005 USDC per request and names Base, Solana, and Polygon. The same page says to read the latest price from the 402 response.</p>
+    <ol>
+      <li>Do not send a CoinGecko API key header on these calls. The x402 path is the pay-per-call product. The key is the other product.</li>
+      <li>Allowlist the <code>/x402/</code> path you call. A prefix of the whole <span className="mono">pro-api.coingecko.com</span> host also covers non-x402 routes.</li>
+      <li>Polygon and Solana stay outside the v1 selector. If the challenge offers Base, the policy chain is <code>eip155:8453</code> and the <code>payTo</code> is the Base entry in that challenge.</li>
+    </ol>
+  </EndpointSetup>
+</section>
+
+<section className="docs-section" id="massive">
+  <h2>Massive</h2>
+  <EndpointSetup
+    docsHref="https://massive.com/docs"
+    docsLabel="Massive docs"
+    host="https://agent.massive.com"
+  >
+    <p>Massive’s docs home is the link above. The x402 note is <DocAnchor href="https://massive.com/docs/ai-tools/x402">x402 payments</DocAnchor>. That note describes US stock data on <span className="mono">agent.massive.com</span>, paid in USDC on Base, with no Massive account. The API-key host <span className="mono">api.massive.com</span> is a different product. Allowlist <span className="mono">https://agent.massive.com</span> only as widely as the routes you will call. Each route quotes its own price in the 402 response, and that quote is authoritative. A figure in a machine-readable listing is not the cap.</p>
+    <p>Their getting-started text also mentions a separate agent-wallet product. Vaulthropic does not take that key. The user’s signer stays with the user. This gate releases an unsigned payload only after allow and a reservation. The facilitator pays gas on their described path. If your challenge still includes a gas quote, set <code>maxGasAmount</code> or the missing ceiling blocks the call.</p>
+  </EndpointSetup>
+</section>
+
+<section className="docs-section" id="runapi">
+  <h2>RunAPI</h2>
+  <EndpointSetup
+    docsHref="https://runapi.ai/x402"
+    docsLabel="RunAPI x402 page"
+    host="https://runapi.ai"
+  >
+    <p>RunAPI’s x402 page describes pay-per-request model routes on Base. The amount and <code>payTo</code> travel in <code>PAYMENT-REQUIRED</code>. A catalog table on that page is not a ceiling and not an allowlist. Prices and addresses on the page can change. The challenge is the exact quote, and quotes on that page have been described as expiring.</p>
+    <ol>
+      <li>Choose the route URL from RunAPI’s own page. Do not take it from a copy of this guide.</li>
+      <li>Call that URL with no payment. Read <code>accepts</code> on the 402: <code>payTo</code>, asset, network, and amount.</li>
+      <li>Confirm the network is one your policy allows, the asset matches USDC for that network, and the amount fits the per-transaction, epoch, fee, gas, and combined ceilings.</li>
+      <li>Ignore any receiving address that is not in that challenge. Then allowlist the payee and the resource URL you actually called.</li>
+    </ol>
+  </EndpointSetup>
+</section>
+
+<section className="docs-section" id="payapi">
+  <h2>PayAPI Market</h2>
+  <EndpointSetup
+    docsHref="https://payapi.market/"
+    docsLabel="PayAPI Market"
+    host="https://payapi.market"
+  >
+    <p>PayAPI Market is a catalogue, not a settlement rail and not a Vaulthropic allowlist. Discovery on <span className="mono">https://payapi.market/agent/search</span> and the MCP endpoint <span className="mono">https://payapi.market/mcp</span> is how that site says agents find listings. Payment happens on the provider’s own 402, not on PayAPI. You do not allowlist PayAPI as the <code>payTo</code> for a listing’s call.</p>
+    <ol>
+      <li>Treat discovery as unpaid lookup. A listing marked verified means that market reports it sent a test payment. That badge is not a Vaulthropic allow decision, and it does not add a server, a tool, a recipient, or an endpoint.</li>
+      <li>Open the provider URL shown on the listing. Call that URL yourself, with no payment header.</li>
+      <li>Read that provider’s challenge. Allowlist only the <code>payTo</code>, asset, chain, and resource URL in the challenge. Do not copy a shortened address out of a market write-up.</li>
+      <li>Run the Decision Lab block against the example allowlist before this new prefix and payee are what an agent can spend.</li>
+    </ol>
+  </EndpointSetup>
+</section>

@@ -1,0 +1,30 @@
+:root {
+  --vt-primary: #0c3b4c;
+  --vt-primary-ink: #ffffff;
+  --vt-secondary: #176b57;
+  --vt-secondary-ink: #ffffff;
+  --vt-secondary-bright: #1f8a70;
+  --vt-bright-ink: #062821;
+  --vt-accent-ink: #062821;
+  --vt-accent-green: #34db89;
+  --vt-accent-yellow: #ffd33d;
+  --vt-accent-red: #ff5b67;
+  --vt-accent-blue: #4d9cff;
+  --vt-accent-magenta: #ee5df2;
+  --vt-bg: #062821;
+  --vt-surface: #ffffff;
+  --vt-ink: #102027;
+  --vt-muted: #4e646c;
+  --vt-line: #d5e0e2;
+  --vt-allow: var(--vt-accent-green);
+  --vt-allow-bg: var(--vt-accent-green);
+  --vt-block: var(--vt-accent-red);
+  --vt-block-bg: var(--vt-accent-red);
+  --vt-pending: var(--vt-accent-yellow);
+  --vt-pending-bg: var(--vt-accent-yellow);
+  --vt-focus: #2165c7;
+  --vt-display: "Bricolage Grotesque", "Public Sans", "Segoe UI", sans-serif;
+  --vt-font: "Public Sans", "Segoe UI", sans-serif;
+  --vt-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --vt-shadow: 0 1px 0 rgb(16 32 39 / 6%);
+}

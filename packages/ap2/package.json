@@ -1,0 +1,15 @@
+{
+  "name": "@vaulthropic/ap2",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Policy gate for AP2 intent, cart, and payment mandates.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vaulthropic/core": "workspace:*",
+    "viem": "^2.23.2"
+  }
+}

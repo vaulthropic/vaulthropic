@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+node "$root/scripts/check-public-boundary.mjs" --staged
+node "$root/scripts/scan-secrets.mjs" --staged
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --config "$root/.gitleaks.toml"
+fi

@@ -1,0 +1,15 @@
+# Optional pre-commit framework entry. The repo-enforced hook is .githooks/pre-commit.
+# Install that one with: bash scripts/install-git-hooks.sh
+repos:
+  - repo: local
+    hooks:
+      - id: vaulthropic-boundary
+        name: public path boundary
+        entry: node scripts/check-public-boundary.mjs --staged
+        language: system
+        pass_filenames: false
+      - id: vaulthropic-secrets
+        name: secret pattern scan
+        entry: node scripts/scan-secrets.mjs --staged
+        language: system
+        pass_filenames: false

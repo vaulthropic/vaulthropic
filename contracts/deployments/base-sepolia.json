@@ -1,0 +1,10 @@
+{
+  "chainId": 84532,
+  "caip2": "eip155:84532",
+  "name": "base-sepolia",
+  "status": "not-deployed",
+  "policyAnchor": null,
+  "guardAccountFactory": null,
+  "usdc": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "notes": "Null contract addresses mean this repository does not claim a deployment. Publish them only after bytecode verification."
+}

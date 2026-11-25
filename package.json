@@ -1,0 +1,31 @@
+{
+  "name": "vaulthropic",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Non-custodial on-chain guardrails for autonomous agent payments.",
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "vitest run && node --test scripts/*.test.mjs",
+    "typecheck": "tsc -p packages/core && tsc -p packages/x402 && tsc -p packages/ap2 && tsc -p packages/mpp && tsc -p packages/mcp-gate && tsc -p packages/chain-adapter && tsc -p apps/web",
+    "lint": "eslint .",
+    "build": "pnpm --filter @vaulthropic/web build",
+    "dev": "pnpm --filter @vaulthropic/web dev",
+    "test:contracts": "forge test",
+    "check:boundary": "node scripts/check-public-boundary.mjs",
+    "check:secrets": "node scripts/scan-secrets.mjs",
+    "hooks:install": "bash scripts/install-git-hooks.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.2",
+    "vitest": "^3.0.5"
+  }
+}

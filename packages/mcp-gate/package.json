@@ -1,0 +1,14 @@
+{
+  "name": "@vaulthropic/mcp-gate",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Policy gate for MCP tool calls that can spend or reach paid endpoints.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vaulthropic/core": "workspace:*"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "cla": "CLA.md",
+  "claVersion": "1",
+  "note": "Public log of GitHub logins that posted the exact CLA.md acceptance comment. A record grants no compensation. Do not store email addresses here.",
+  "allowlistedBots": ["dependabot[bot]"],
+  "signatures": []
+}

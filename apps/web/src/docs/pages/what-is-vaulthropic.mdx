@@ -1,0 +1,90 @@
+<section className="docs-section" id="what">
+  <h2>What it is</h2>
+  <p>Vaulthropic is policy software for an AI agent that pays. The agent can buy an API call, a data lookup, or a tool use. The money stays in an account you own. Vaulthropic never holds it.</p>
+  <p>Without a limit, you have two bad choices. Hand the agent your wallet key, and a bad prompt, a loop, or a compromised tool can spend the whole balance. Or approve every small payment yourself, and the agent is no longer autonomous. Vaulthropic is the third path: you write the rules, and the agent gets a session that can spend only inside them.</p>
+  <p>You set the rules. A typical set is:</p>
+  <ul>
+    <li>A maximum for one payment, and a maximum for the rolling period.</li>
+    <li>An allowlist of who can be paid, which asset, which chain, and which endpoint, server, or tool. The agent cannot add itself.</li>
+    <li>A step-up amount. At or above that line, the payment pauses until you confirm. Confirming does not raise the caps.</li>
+    <li>A time limit. When the session ends, the permission ends. You can also stop the session.</li>
+  </ul>
+  <p>The owner of the account keeps a direct way out. That path does not spend the session budget. The session is a separate, narrower path.</p>
+</section>
+
+<section className="docs-section" id="boundary">
+  <h2>What it is not</h2>
+  <p>Vaulthropic is non-custodial policy software. It does not hold customer deposits, pooled funds, or root private keys. It is not a bank, custodian, or money transmitter. It is not affiliated with the operators of Base, Circle, or the authors of x402, AP2, MPP, or MCP.</p>
+  <p>There is no admin sweep and no pooled treasury. Console sign-in does not create a wallet, collect a seed phrase, or grant a spending allowance. A passkey, a wallet signature, a one-time code, and an API key are not owner keys.</p>
+</section>
+
+<section className="docs-section" id="checks">
+  <h2>What gets checked</h2>
+  <p>One policy covers the four payment rails. The check runs before a payload is signed or a settlement is submitted.</p>
+  <ul>
+    <li><strong>x402.</strong> An HTTP 402 challenge. The exact amount, chain, asset, payee, resource, fee, and gas are checked against the policy. The authorization is built only after allow.</li>
+    <li><strong>AP2.</strong> Intent, cart, and payment mandates. Types, signatures, time limits, amount, payee, and the cart commitment have to agree.</li>
+    <li><strong>MPP.</strong> A payment challenge and its expiry. A credential is built only after allow, and only with a real settlement reference. Vaulthropic does not broadcast that payment.</li>
+    <li><strong>MCP.</strong> A paid or state-changing tool call. The server and the tool must already be allowed. Prompt text is not permission to add a tool or a server.</li>
+  </ul>
+  <p>Fees and gas are part of the spend. They count against ceilings you set. A fee or gas quote with no matching ceiling fails closed. Principal, fee, and gas together stay inside the combined ceiling when you set one, and inside the period limit.</p>
+  <p>On the reference account, a guarded token transfer is also checked on-chain. The anchor records that charge when the transfer executes. It does not reserve or release an off-chain attempt by itself.</p>
+  <Callout tone="warning" title="A USDC signature made outside the host">
+    <p>For an EIP-3009 authorization, the USDC contract does not call the policy anchor. The protection is the host: it withholds the unsigned payload unless the policy allows it. The contract cannot cancel a signature that was created somewhere else.</p>
+  </Callout>
+  <p>Agents retry. When the host uses the attempt ledger, one attempt reserves its budget once, and a retry of that same attempt does not reserve it again. That lock lives in one running process. Several hosts sharing one budget need a shared store first. A dropped, replaced, reverted, or expired attempt releases the reservation. The ledger does not invent a transaction hash or a receipt.</p>
+  <p>The contracts in this repository are not a live deployment by themselves. A null address in a deployment record means there is no verified contract at that address yet.</p>
+</section>
+
+<section className="docs-section" id="learn">
+  <h2>How you learn it</h2>
+  <ol>
+    <li><strong>Rehearse first.</strong> The <LabLink>Decision Lab</LabLink> runs the example policy. You change the amount, the recipient, the fee, and the gas and see allow, step-up, or block. Testnet in that screen locks Base Sepolia. Mainnet in that screen holds a live endpoint and a public payTo only, and it does not write the rehearsal draft.</li>
+    <li><strong>Practice with test money.</strong> The guide links faucets for test USDC on Base Sepolia. Nothing there is real funds. Watch an allow, a step-up, and a block before you point a session at Base.</li>
+    <li><strong>Read the reason.</strong> A block comes back as a stable reason code and a plain explanation, such as a payment that is over the per-transaction cap. You do not have to decode a raw hash to see why it stopped.</li>
+  </ol>
+</section>
+
+<section className="docs-section" id="work">
+  <h2>Work the caps make safer</h2>
+  <p>The point of the cap is that the agent cannot raise it. An operator can let the agent pay for data, APIs, and tools inside a budget. A loop, a bad prompt, or a fee spike stops at that budget instead of the whole balance.</p>
+  <ul>
+    <li>Paid research and lead work: small payments for articles, filings, and enrichment, with a ceiling per project.</li>
+    <li>Procurement inside a limit: the agent buys data or compute only when your rule matches, and only up to the daily ceiling.</li>
+    <li>Setup for a team: someone configures the allowlists, the budgets, and the step-up line for operators who do not write contracts.</li>
+  </ul>
+  <p>These are patterns the rules can bound. Vaulthropic does not hold the proceeds, pay you, or promise a return.</p>
+</section>
+
+<section className="docs-section" id="sign-in">
+  <h2>How sign-in works</h2>
+  <p>Sign-in opens the console for this page session. It grants no token allowance, no spending key, and no session budget. Connecting a wallet you control as the owner of a guard account is a separate step from signing in.</p>
+
+  <h3 id="passkey">Passkey</h3>
+  <ol>
+    <li>Open Sign in and choose the passkey tab. The name field starts empty. Create passkey stays off until the name you type is valid.</li>
+    <li>A typed email is an unverified label. This build does not send mail. The passkey’s user id is a random handle, not the email.</li>
+    <li>The browser asks for Face ID, Touch ID, a device PIN, or the platform equivalent, bound to this site. That ceremony does not create an EVM or Solana key.</li>
+    <li>The credential id stays in the page session. It is not a production identity directory, and it holds no funds.</li>
+  </ol>
+
+  <h3 id="wallet">Wallet signature</h3>
+  <ol>
+    <li>Choose Sign in with wallet. The page lists wallets that announced themselves in this browser before it asks for an account.</li>
+    <li>You see the sign-in message before any signature. It is bound to this site and this chain, it expires, and it says the signature grants zero token allowance and zero spending authority.</li>
+    <li>The signature proves you control that address for console sign-in. It does not assign a guard owner or a session signer, and it does not move funds.</li>
+  </ol>
+
+  <h3 id="step-up">Authenticator step-up</h3>
+  <p>A one-time code is not a way to sign in. You enroll it after you already have a console session. The secret stays in the page. When a payment is at or above the step-up line, you enter the current code. A match means the factor was checked. It does not authorize the payment, and it does not raise the caps. A mismatch authorizes nothing.</p>
+
+  <h3 id="oauth">OAuth</h3>
+  <p>Continue with OAuth is off in this public build, with the note “Coming soon in a later release.” It stays off until a private deployment supplies an HTTPS authorization URL. No client secret belongs in the page. When that path exists, it still only attaches a login. It still holds no funds and no spending key.</p>
+
+  <h3 id="api-key">API key for an agent</h3>
+  <ol>
+    <li>From the console, issue a page-local key for the environment and policy you are looking at. The token is shown for you to copy into the agent. This build keeps it in the page.</li>
+    <li>A <code>vth_live_</code> prefix here is a local demo token. It is not a credential for a deployed mainnet contract.</li>
+    <li>The key can be checked against its environment, policy, and ceiling. Revoke cuts that key off. Revoking it does not move funds.</li>
+  </ol>
+</section>

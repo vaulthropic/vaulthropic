@@ -1,0 +1,180 @@
+<section className="docs-section" id="overview">
+  <h2>Overview and non-custodial guarantees</h2>
+  <p>Vaulthropic is a pre-execution financial firewall across x402, AP2 (Agent Payments Protocol), MPP (Machine Payments Protocol), and MCP (Model Context Protocol). One policy returns the verdict. The signable payload is prepared only after allow.</p>
+  <ul>
+    <li>Vaulthropic does not hold pooled customer funds, root private keys, or seed phrases.</li>
+    <li><code>GuardAccount</code> stays with the owner. Owner <code>execute</code> does not charge the session budget. <code>executeAsSession</code> calls <code>PolicyAnchor.charge</code> before the token moves.</li>
+    <li>A session signer spends only inside scoped ceilings and a TTL (<code>session.validUntil</code>). A passkey is a console identity. It is not a spending key, and it grants no token allowance.</li>
+    <li><code>AttemptLedger</code> reserves principal + quoted fee + gas before broadcast and releases that reservation on drop, revert, failure, or expiry.</li>
+  </ul>
+</section>
+
+<section className="docs-section" id="networks">
+  <h2>Supported blockchains and testnets</h2>
+  <p>v1 has two settlement targets. Both use USDC with 6 decimals. Contract addresses in this repository are null until bytecode verification. A null address is not a live deployment.</p>
+</section>
+
+<section className="docs-section" id="base-mainnet">
+  <h3>Base mainnet · eip155:8453</h3>
+  <p>Mainnet settlement target for <code>GuardAccount</code> and the <code>AttemptLedger</code> status and reason model. USDC is <span className="mono">0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</span>. Execution is nonce-serialized per session signer. <code>contracts/deployments/base.json</code> records <code>not-deployed</code>, with <code>policyAnchor</code> and <code>guardAccountFactory</code> null.</p>
+</section>
+
+<section className="docs-section" id="base-sepolia">
+  <h3>Base Sepolia · eip155:84532</h3>
+  <p>Sandbox and integration network. Contract semantics match Base mainnet. USDC is <span className="mono">0x036CbD53842c5426634e7929541eC2318f3dCF7e</span>. No real funds move. Verify here before changing a session’s environment to Base. A sandbox credential presented to a mainnet policy is <code>BLOCK_SESSION_ENVIRONMENT</code>.</p>
+</section>
+
+<section className="docs-section" id="testnet-usdc-faucet">
+  <h2>Testnet USDC faucet</h2>
+  <p>Start on Base Sepolia (<code>eip155:84532</code>), the v1 sandbox. Circle’s public faucet sends testnet USDC to an address you paste. It does not ask for a Circle account. Circle’s page states the current limit: 20 testnet USDC per address, per network, every 2 hours.</p>
+  <p>When the test pays gas from that wallet, also claim a small amount of the testnet native token: ETH, POL, or SOL. Circle’s Developer Console faucet sends native testnet tokens to Circle Wallets. A wallet you control uses the gas faucets in the table. These testnets fund that wallet. The v1 environment control still lists Base and Base Sepolia. Arbitrum Sepolia (<code>eip155:421614</code>), Polygon Amoy (<code>eip155:80002</code>), and Ethereum Sepolia (<code>eip155:11155111</code>) are funding networks, distinct from the mainnet adapter ids.</p>
+  <div className="docs-table-wrap">
+    <table className="docs-table">
+      <caption>Testnet USDC and native gas by network</caption>
+      <thead>
+        <tr>
+          <th scope="col">Network</th>
+          <th scope="col">Testnet USDC</th>
+          <th scope="col">Native gas and docs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Base Sepolia <code>eip155:84532</code></th>
+          <td>Circle faucet, network <strong>Base Sepolia</strong>.</td>
+          <td>
+            <DocAnchor href="https://faucet.circle.com/">Circle Testnet Faucet</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://docs.base.org/get-started/get-funds">Base Get Funds</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://faucets.chain.link/base-sepolia">Chainlink Base Sepolia</DocAnchor>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Arbitrum Sepolia <code>eip155:421614</code></th>
+          <td>Circle faucet, network <strong>Arbitrum Sepolia</strong>.</td>
+          <td>
+            <DocAnchor href="https://faucet.circle.com/">Circle Testnet Faucet</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://faucets.chain.link/arbitrum-sepolia">Chainlink Arbitrum Sepolia</DocAnchor>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Polygon Amoy <code>eip155:80002</code></th>
+          <td>Circle faucet, network <strong>Polygon PoS Amoy</strong>. Gas token is POL.</td>
+          <td>
+            <DocAnchor href="https://faucet.circle.com/">Circle Testnet Faucet</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://faucets.chain.link/polygon-amoy">Chainlink Polygon Amoy</DocAnchor>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Solana Devnet <code>solana:devnet</code></th>
+          <td>Circle faucet, network <strong>Solana Devnet</strong>.</td>
+          <td>
+            <DocAnchor href="https://faucet.circle.com/">Circle Testnet Faucet</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://faucet.solana.com/">Solana Devnet Faucet</DocAnchor>
+            . The Solana CLI can also request devnet SOL with <code>solana airdrop</code> and <code>--url devnet</code>.
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Ethereum Sepolia <code>eip155:11155111</code></th>
+          <td>Circle faucet, network <strong>Ethereum Sepolia</strong>. If a testnet is missing from that list, Circle’s CCTP docs describe a testnet move from Ethereum Sepolia onto a supported testnet.</td>
+          <td>
+            <DocAnchor href="https://faucet.circle.com/">Circle Testnet Faucet</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://developers.circle.com/cctp">Circle CCTP</DocAnchor>
+            {" · "}
+            <DocAnchor href="https://faucets.chain.link/base-sepolia">Chainlink faucets</DocAnchor>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Funding checklist</h3>
+  <ol>
+    <li>Pick the exact testnet. A v1 session starts on Base Sepolia.</li>
+    <li>Claim testnet USDC from Circle’s faucet. Claim testnet ETH, POL, or SOL when that wallet pays gas.</li>
+    <li>Confirm the balance in the wallet you control. Run a small allow (<code>ALLOW_WITHIN_POLICY</code>) and a ceiling block (<code>BLOCK_*</code>) in the <LabLink>Decision Lab</LabLink> before raising test amounts.</li>
+  </ol>
+  <p>Vaulthropic is not affiliated with Circle, the operators of Base, Chainlink, or the Solana Foundation. Testnet tokens have no real value. Each faucet link opens the operator’s site in a new tab.</p>
+</section>
+
+<section className="docs-section" id="adapters">
+  <h3>Chain-agnostic engine and the adapter roadmap</h3>
+  <p>The core policy engine and AttemptLedger do not encode a chain. <code>@vaulthropic/chain-adapter</code> turns each rail into the same spend request. Fee, gas, and combined ceilings, idempotency, and <code>BLOCK_*</code> reasons stay in the core. The package does not custody funds, hold a signing key, or embed an operator RPC.</p>
+  <ul>
+    <li>v1 is Base (<code>eip155:8453</code>) and Base Sepolia (<code>eip155:84532</code>). The network selector lists these two. The host calls <code>setSignerNonce</code> first. An unseeded signer is <code>BLOCK_NONCE_UNAVAILABLE</code>. Deployment files stay <code>not-deployed</code>.</li>
+    <li>Wave 2 is Arbitrum (<code>eip155:42161</code>) and Polygon (<code>eip155:137</code>). They reuse the EVM adapter. A quote above <code>maxCombinedAmount</code> is <code>BLOCK_COMBINED_CEILING</code> on every chain.</li>
+    <li>Wave 3 is Solana (<code>solana:mainnet</code>, <code>solana:devnet</code>), BSC (<code>eip155:56</code>), Ethereum (<code>eip155:1</code>), and the Tempo rail (<code>mpp:tempo</code>). Solana leases a recent blockhash and releases the reservation when that window passes. Tempo binds one challenge to one attempt. This repository publishes no Solana program, no Tempo deployment, and no token address for those later rails.</li>
+  </ul>
+</section>
+
+<section className="docs-section" id="session-setup">
+  <h2>Session setup</h2>
+  <h3 id="identity">Step 1 — Console identity and wallet ownership</h3>
+  <ol>
+    <li>Open Sign in. The email or username field starts empty. Create passkey stays off until the name is valid. WebAuthn runs on that click and the browser prompt shows only what you typed. WebAuthn does not confirm the inbox. The passkey user id is a random handle, not a chain address. An email stays labeled Unverified email. Sign in with passkey is a separate button and stays off until that click. An empty field asserts a passkey already on the device. A typed name is an unverified label. This page stores the credential id and does not check the signature or the sign counter. Neither button generates an EVM or Solana key.</li>
+    <li>Or click Sign in with wallet. Pick a detected EIP-6963 wallet. That choice asks for an account, then the page shows the exact sign-in message. Sign this message is the signature request. The page recovers the signer and checks the message, domain, chain id, and expiry before it shows the address. Guard owner and session signer stay unassigned. A deployed console verifies the signature again and accepts each nonce once. The signature grants zero token allowance. Other connectors stay on “Coming soon in a later release.”</li>
+    <li>The environment control lists Base and Base Sepolia only.</li>
+  </ol>
+  <p>A production console keeps a private identity directory: the random user handle, the credential public key, a sign counter, and whether the email is verified. That directory is not a ledger. It holds no balance, seed phrase, or spending key. This public demo stores the credential id in the page session only and does not ship that database. A page-local TOTP seed and a page-local API token stay in the page. A matching code does not authorize a payment. The token is not saved.</p>
+  <h3 id="ceilings">Step 2 — Ceilings, fees, and allowlists</h3>
+  <p>Set the network, then the caps. Principal + fee + gas counts against the epoch budget. The console labels map to <code>perEpoch</code>, <code>perTransaction</code>, <code>stepUpAbove</code>, and <code>session.validUntil</code>. The epoch window (<code>epochSeconds</code>, 24 hours on the example policy) is separate from the session TTL.</p>
+  <ul>
+    <li><code>maxFeeAmount</code> and <code>maxFeeBps</code> (0 through 10000). A positive quoted fee with neither ceiling set is <code>BLOCK_FEE_CEILING</code>.</li>
+    <li><code>maxGasAmount</code>. A positive gas budget with that ceiling omitted is <code>BLOCK_GAS_CEILING</code>.</li>
+    <li><code>maxCombinedAmount</code>. Principal + fee + gas above it is <code>BLOCK_COMBINED_CEILING</code>. The combined ceiling cannot exceed the epoch budget.</li>
+    <li>Recipients, USDC for the selected network, and the protocols x402, AP2, MPP, and MCP. The example recipient is <span className="mono">0x209693Bc6afc0C5328bA36FaF03C514EF312287C</span>. The example endpoint prefix is <span className="mono">https://merchant.example</span>.</li>
+  </ul>
+  <p>Normalization requires <code>stepUpAbove &lt;= perTransaction &lt;= perEpoch</code>. Direct evaluation after session expiry returns <code>BLOCK_SESSION_EXPIRED</code>. An expired deadline or one later than the session returns <code>BLOCK_DEADLINE_EXCEEDED</code>. <code>AttemptLedger.begin</code> checks the deadline first; see the AttemptLedger section below for that precedence.</p>
+  <h3 id="verify">Step 3 — Verify on Base Sepolia, then promote</h3>
+  <p>Run a dry decision on Base Sepolia first. With the example ceilings (25 USDC per transaction, 100 USDC per epoch, step-up at 10 USDC) and the allowlisted recipient:</p>
+  <ul>
+    <li>1 USDC returns <code>ALLOW_WITHIN_POLICY</code>.</li>
+    <li>10 USDC returns <code>STEP_UP_ABOVE_THRESHOLD</code>.</li>
+    <li>30 USDC returns <code>BLOCK_PER_TX_CAP</code>.</li>
+    <li>Confirm <code>BLOCK_FEE_CEILING</code>, <code>BLOCK_GAS_CEILING</code>, <code>BLOCK_COMBINED_CEILING</code>, <code>BLOCK_REPLAY</code>, <code>BLOCK_ATTEMPT_IN_FLIGHT</code>, <code>BLOCK_NONCE_UNAVAILABLE</code>, and <code>BLOCK_DEADLINE_EXCEEDED</code> with the probes in the user guide.</li>
+  </ul>
+  <p>Change the session environment to Base only after those sandbox results match. Published deployment addresses are still null, so a mainnet session cannot settle on-chain until bytecode-verified addresses are published. The pre-sign function is the same either way. The <LabLink>Decision Lab</LabLink> is its own screen and does not require sign-in. Its Testnet tab runs these probes against the example policy without signing or broadcasting. Its Mainnet tab can hold a live endpoint and a public payTo in that screen only. It does not write them into the rehearsal draft, and it does not settle while the deployment record is null. A draft is stored in the browser only after Save draft in this browser, and loading it is a separate click. That draft is not a committed policy. There is no user dashboard until an owner commits a policy hash to a guard account. AP2 in the lab is a presence check, not SD-JWT verification. A replay walks a simulated AttemptLedger with a synthetic hash, then discards it. The console example-policy card is that example hash, not a commitment and not the lab draft.</p>
+</section>
+
+<section className="docs-section" id="protocols">
+  <h2>Protocol integration</h2>
+  <p>Each adapter normalizes to the same allow, step-up, or block. Finality then waits on AttemptLedger. Fast inclusion commits at <code>INCLUDED_UNFINALIZED</code>. Irreversible intents wait for <code>FINALIZED</code>. A revert, drop, or expiry releases the reservation.</p>
+  <pre className="sequence">{`Agent            Vaulthropic          AttemptLedger            Chain
+  |  intent           |                     |                     |
+  |------------------>| evaluate            |                     |
+  |                   |-------------------->| CREATED + reserve   |
+  |                   |                     | assign nonce        |
+  |  verdict          |                     |                     |
+  |<------------------|                     |                     |
+  | sign after allow; x402 releases payload first |
+  |---------------------------------------- broadcast -------->|
+  |                   | IN_FLIGHT_PENDING   |                     |
+  |                   | INCLUDED_UNFINALIZED|  fast commits       |
+  |                   | FINALIZED           |  irreversible commits
+  |                   | or DROPPED / REVERTED / EXPIRED_OR_DROPPED / FAILED
+  |                   |                     | release             `}</pre>
+  <h3 id="x402">x402 HTTP 402 guard</h3>
+  <p>Evaluate the version-2 exact requirement before any EIP-3009 authorization is built. The decision itself omits the authorization. <code>releaseX402Authorization</code> returns the payload only after this process’s AttemptLedger reserves the matching attempt. Block and step-up omit it. A second ledger returns no payload. More than one declared process throws until one serializable store reserves the budget. Pass <code>quotedFeeAmount</code> and <code>maxGasFee</code> in minor units with the requirement. Third-party pay-per-call setup is on <DocAnchor href="/docs/usdc-apis">APIs accepting USDC</DocAnchor>.</p>
+  <h3 id="ap2">AP2 mandate verifier</h3>
+  <p>Intent, cart, and payment mandates agree on amount, payee, time, and cart hash. The payment principal plus quoted fee and gas stays inside the intent amount. A mismatch returns a <code>BLOCK_MANDATE_*</code> or <code>BLOCK_CART_MISMATCH</code> reason before the spend ceilings run.</p>
+  <h3 id="mpp">MPP machine payments</h3>
+  <p>Parse the Payment challenge, evaluate it, and build a credential only after allow. The receipt binds the transaction hash. A settled challenge presented again is <code>BLOCK_REPLAY</code>.</p>
+  <h3 id="mcp">MCP tool firewall</h3>
+  <p>The example allowlist accepts <code>search</code> and <code>quote</code> on <span className="mono">https://mcp.example.com</span>. Any other server is <code>BLOCK_MCP_SERVER_NOT_ALLOWLISTED</code>. Any other tool is <code>BLOCK_MCP_TOOL_NOT_ALLOWLISTED</code>. Tool arguments may carry <code>quotedFeeAmount</code> and <code>maxGasFee</code> into the same ceiling checks. In the Decision Lab the server stays <span className="mono">https://mcp.example.com</span> and the tool stays <code>quote</code>. Changing the endpoint field checks that URL. It does not add a server or a tool.</p>
+</section>
+
+<section className="docs-section" id="attempt-ledger">
+  <h2>AttemptLedger and reason codes</h2>
+  <p id="reason-codes">Statuses are <code>CREATED</code>, <code>IN_FLIGHT_PENDING</code>, <code>INCLUDED_UNFINALIZED</code>, <code>FINALIZED</code>, <code>DROPPED</code>, <code>REPLACED</code>, <code>REVERTED</code>, <code>EXPIRED_OR_DROPPED</code>, and <code>FAILED</code>. The reservation sits on <code>CREATED</code>. There is no separate INIT or RELEASED status. An idempotency key that already has an attempt returns that attempt and does not reserve again. <code>BLOCK_REPLAY</code> is a settled challenge, mandate, transaction, or receipt. <code>BLOCK_ATTEMPT_IN_FLIGHT</code> is the serial queue.</p>
+  <p>The same catalog uses <code>ALLOW_WITHIN_POLICY</code>, <code>ALLOW_STEP_UP</code>, <code>STEP_UP_ABOVE_THRESHOLD</code>, <code>BLOCK_PER_TX_CAP</code>, <code>BLOCK_EPOCH_CAP</code>, <code>BLOCK_FEE_CEILING</code>, <code>BLOCK_GAS_CEILING</code>, <code>BLOCK_COMBINED_CEILING</code>, <code>BLOCK_SESSION_EXPIRED</code>, <code>BLOCK_RECIPIENT_NOT_ALLOWLISTED</code>, <code>BLOCK_NONCE_UNAVAILABLE</code>, and <code>BLOCK_DEADLINE_EXCEEDED</code>.</p>
+</section>
+
+<section className="docs-section" id="security">
+  <h2>Security and the non-custodial model</h2>
+  <p>Vaulthropic at vaulthropic.com is non-custodial policy software. It does not hold customer deposits or ask for a seed phrase. It is not a bank, custodian, or money transmitter. It is not affiliated with the operators of Base, Circle or the authors of x402, AP2, MPP, or MCP.</p>
+  <p>A fee or gas figure is an input. The policy checks it against the user’s ceiling. The evaluator does not compute a rate card, a take rate, or a quote. Report a spend bypass against the contracts and adapters.</p>
+</section>
