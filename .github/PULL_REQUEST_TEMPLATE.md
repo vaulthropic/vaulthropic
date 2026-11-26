@@ -4,17 +4,17 @@
 
 ## CLA
 
-The required status check is `Vaulthropic CLA`. Check the boxes in this template, then post a **new** pull request comment that contains only this sentence:
+The required status check is `Vaulthropic CLA`.
+
+After you create this pull request, Overview may show the status "Required checks failing".
+
+In this CLA summary, check the boxes under Boundary and secrets and/or Local checks. Copy this line and post it as a comment, with no other text:
 
 `I have read and agree to the terms of CLA.md`
 
-Case, extra spaces, and an optional trailing period are ignored. No other text is allowed. Editing an old comment does not trigger a new check. Post a new comment.
+Case, extra spaces, and an optional trailing period are ignored. No other text is allowed.
 
-Posting the comment does not always turn `Vaulthropic CLA` green. If the check still fails or stays red after the boxes are checked and the new comment is posted:
-
-1. Click the failed check in the status bar above, or **Details** next to **CLA / CLA acceptance**. You can also open the **Checks** tab.
-2. Open the job menu and click **Re-run failed jobs**.
-3. Wait for the re-run to finish so the check passes.
+Commenting alone does not automatically pass the check. Under "Required checks failing", click "Checks". The list drops down and shows "CLA / CLA acceptance (pull_request_target)". Click that link. On the next page, at the top right, click "Re-run jobs", then "Re-run failed jobs". Wait for the re-run to finish so the check passes.
 
 `dependabot[bot]` is allowlisted and does not comment. The agreement is https://github.com/vaulthropic/vaulthropic/blob/main/CLA.md.
 
