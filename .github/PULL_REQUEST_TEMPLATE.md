@@ -4,11 +4,19 @@
 
 ## CLA
 
-The required status check is `Vaulthropic CLA`. After you open this pull request, add a comment that contains only this sentence:
+The required status check is `Vaulthropic CLA`. Check the boxes in this template, then post a **new** pull request comment that contains only this sentence:
 
 `I have read and agree to the terms of CLA.md`
 
-No trailing period is required. One trailing period is also accepted. Letter case and extra spaces do not matter. Any other text in that comment does not count. Posting the comment re-runs `.github/workflows/cla.yml` and updates the `Vaulthropic CLA` status. `dependabot[bot]` is allowlisted and does not comment. The agreement is https://github.com/vaulthropic/vaulthropic/blob/main/CLA.md.
+Case, extra spaces, and an optional trailing period are ignored. No other text is allowed. Editing an old comment does not trigger a new check. Post a new comment.
+
+Posting the comment does not always turn `Vaulthropic CLA` green. If the check still fails or stays red after the boxes are checked and the new comment is posted:
+
+1. Click the failed check in the status bar above, or **Details** next to **CLA / CLA acceptance**. You can also open the **Checks** tab.
+2. Open the job menu and click **Re-run failed jobs**.
+3. Wait for the re-run to finish so the check passes.
+
+`dependabot[bot]` is allowlisted and does not comment. The agreement is https://github.com/vaulthropic/vaulthropic/blob/main/CLA.md.
 
 The workflow stays skipped until the repository variable `CLA_GATE_ENABLED` is `true`.
 
